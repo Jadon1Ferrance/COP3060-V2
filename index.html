@@ -3,17 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jadon N. Ferrance — PA02</title>
-
-    <!-- Linked external stylesheet -->
+    <title>Jadon N. Ferrance — PA02 (JS)</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main>
-      <h1 id="special">Jadon N. Ferrance</h1>
+      <h1>Jadon N. Ferrance</h1>
       <p class="highlight">
-        I’m a Computer Science student at Florida Agricultural and Mechanical University (B.S. ’25).
-        I enjoy practical ML: VGG16 + Grad-CAM for explainable imaging and XGBoost + SHAP for fair loan modeling.
+        I’m a Computer Science student at Florida A&M University (B.S. ’25).
+        I enjoy practical ML: VGG16 + Grad-CAM and XGBoost + SHAP.
       </p>
 
       <address id="callout">
@@ -40,21 +38,21 @@
           <label for="password">Password</label>
           <input id="password" name="password" type="password" minlength="8" required />
 
-          <p>Do you like my website?</p>
-          <label><input type="radio" name="likewebsite" value="yes" required /> Yes</label>
-          <label><input type="radio" name="likewebsite" value="no" /> No</label>
+          <p>Do you like this site?</p>
+          <label><input type="radio" name="like" value="yes" required /> Yes</label>
+          <label><input type="radio" name="like" value="no" /> No</label>
 
           <p>
-            <label><input type="checkbox" name="subscribe" value="yes" /> Subscribe for more content!</label>
+            <label><input type="checkbox" name="subscribe" value="yes" /> Subscribe to updates</label>
           </p>
 
-          <label for="browser">Which is your preferred browser?</label>
+          <label for="browser">Which browser do you use?</label>
           <select id="browser" name="browser">
-            <option value="chrome">Chrome</option>
-            <option value="safari">Safari</option>
-            <option value="firefox">Firefox</option>
-            <option value="edge">Edge</option>
-            <option value="other">Other</option>
+            <option>Chrome</option>
+            <option>Safari</option>
+            <option>Firefox</option>
+            <option>Edge</option>
+            <option>Other</option>
           </select>
 
           <p><button type="submit">Submit</button></p>
@@ -106,7 +104,6 @@
       </section>
     </main>
 
-    <!-- Keep your JS at the end with defer -->
     <script src="app.js" defer></script>
   </body>
 </html>
