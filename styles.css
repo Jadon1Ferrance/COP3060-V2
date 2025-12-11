@@ -1,0 +1,29 @@
+/* Type selectors */
+html, body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+h1 { margin: 0 0 .5rem; }
+h2 { margin: 1.25rem 0 .5rem; }
+
+/* Distinctive heading colors */
+h1 { color: #0b63c5; }
+h2 { color: #1f7a8c; }
+
+/* Class selector */
+.highlight { color: #4a148c; }
+
+/* ID selector */
+#callout {
+  border: 1px solid #e3e3e3;
+  padding: .5rem .75rem;
+  border-radius: .5rem;
+}
+
+/* Box model demo */
+table { border-collapse: collapse; margin-top: .5rem; }
+th, td { border: 1px solid #ddd; padding: .5rem .75rem; }
+caption { text-align: left; margin-bottom: .25rem; font-weight: 600; }
