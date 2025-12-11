@@ -3,18 +3,82 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jadon N. Ferrance — COP 3060</title>
+    <title>Jadon N. Ferrance — PA01</title>
   </head>
   <body>
     <main>
-      <h1>Hi, I’m Jadon Ferrance</h1>
+      <h1>Jadon N. Ferrance</h1>
       <p>
-        I’m a Computer Science student at Florida A&M University (B.S. ’25).
-        I like practical ML and explainable AI—projects include a VGG16 + Grad-CAM
-        pipeline for lung cancer imaging, and fairness-aware loan models using
-        XGBoost + SHAP. Outside class, I co-own Crowned Coils Naturals and run
-        our digital marketing.
+        FAMU CS (’25). ML/XAI projects: VGG16 + Grad-CAM, XGBoost + SHAP for fair lending.
+        Co-owner, Crowned Coils Naturals (content, SEO, ads).
       </p>
+
+      <h2>Contact Form</h2>
+      <form action="#" method="post">
+        <fieldset>
+          <legend>Your Info</legend>
+
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" type="text" required />
+
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" type="text" required />
+
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" minlength="8" required />
+
+          <p>Do you like this site?</p>
+          <label><input type="radio" name="like" value="yes" required /> Yes</label>
+          <label><input type="radio" name="like" value="no" /> No</label>
+
+          <p>
+            <label><input type="checkbox" name="subscribe" value="yes" /> Subscribe to updates</label>
+          </p>
+
+          <label for="browser">Which browser do you use?</label>
+          <select id="browser" name="browser">
+            <option>Chrome</option>
+            <option>Safari</option>
+            <option>Firefox</option>
+            <option>Edge</option>
+            <option>Other</option>
+          </select>
+
+          <p><button type="submit">Submit</button></p>
+        </fieldset>
+      </form>
+
+      <h2>Weekly Schedule</h2>
+      <table>
+        <caption>My typical week</caption>
+        <thead>
+          <tr>
+            <th scope="col">Day</th>
+            <th scope="col">Morning</th>
+            <th scope="col">Afternoon</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monday</td>
+            <td>CS Lecture</td>
+            <td>Study & Gym</td>
+          </tr>
+          <tr>
+            <td>Wednesday</td>
+            <td>Data Science Lab</td>
+            <td>Project Work</td>
+          </tr>
+          <tr>
+            <td>Friday</td>
+            <td>Office Hours</td>
+            <td>Business & Family Time</td>
+          </tr>
+        </tbody>
+      </table>
     </main>
   </body>
 </html>
