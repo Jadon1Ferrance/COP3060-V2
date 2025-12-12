@@ -3,13 +3,20 @@ package edu.famu.cop3060.resources.controller;
 import edu.famu.cop3060.resources.dto.CategoryDTO;
 import edu.famu.cop3060.resources.dto.PageResponse;
 import edu.famu.cop3060.resources.service.CategoriesService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categories")
 public class CategoriesController {
+    // keep your existing fields / constructor / methods below
+
   private final CategoriesService svc;
   public CategoriesController(CategoriesService svc) { this.svc = svc; }
 
