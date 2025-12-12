@@ -1,74 +1,139 @@
 package edu.famu.cop3060.resources.store;
 
+import edu.famu.cop3060.resources.dto.CreateResourceDTO;
 import edu.famu.cop3060.resources.dto.ResourceDTO;
-import org.springframework.stereotype.Component;
+import edu.famu.cop3060.resources.dto.UpdateResourceDTO;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
-@Component
+/**
+ * In-memory resource store that owns the data.
+ * Keeps resource records with related IDs (locationId, categoryId)
+ * so we can enforce referential integrity on delete.
+ */
 public class InMemoryResourceStore {
 
-  private final Map<String, ResourceDTO> byId = new HashMap<>();
-  private final List<ResourceDTO> all = new ArrayList<>();
+    /** Internal resource model (not exposed outside the store). */
+    private static final class Resource {
+        final long id;
+        String name;
+        Long locationId;   // nullable
+        Long categoryId;   // nullable
+        String url;
+        List<String> tags;
 
-  public InMemoryResourceStore() {
-    // Seed 8 realistic entries (sprinkle your interests)
-    seed(new ResourceDTO("r1","ML Tutoring (VGG16 + Grad-CAM)","Tutoring","FAMU CS Lab 210",
-            "https://famu.edu/cs/tutoring/ml",
-            List.of("ml","explainability","grad-cam","study-support")));
+        Resource(long id, String name, Long locationId, Long categoryId, String url, List<String> tags) {
+            this.id = id;
+            this.name = name;
+            this.locationId = locationId;
+            this.categoryId = categoryId;
+            this.url = url;
+            this.tags = (tags == null) ? new ArrayList<>() : new ArrayList<>(tags);
+        }
 
-    seed(new ResourceDTO("r2","Data Science Lab Hours","Lab","FAMU DS Lab 220",
-            "https://famu.edu/cs/labs/datascience",
-            List.of("python","pandas","xgboost","shap")));
+        ResourceDTO toDTO() {
+            return new ResourceDTO(
+                id,
+                name,
+                locationId,
+                categoryId,
+                url,
+                List.copyOf(tags)
+            );
+        }
+    }
 
-    seed(new ResourceDTO("r3","Advising — CS Undergrad","Advising","FAMU CESTA Building",
-            "https://famu.edu/cs/advising",
-            List.of("degree-plan","internships","career")));
+    private final Map<Long, Resource> byId = new HashMap<>();
+    private final AtomicLong seq = new AtomicLong(1);
 
-    seed(new ResourceDTO("r4","Web Dev Peer Help","Tutoring","Library 3rd Floor",
-            "https://famu.edu/cs/tutoring/web",
-            List.of("html","css","js")));
+    public InMemoryResourceStore() {
+        // --- Seed 6–8 realistic entries (IDs will be 1..n) ---
+        // These are just examples; adjust names/ids as you like.
+        create(new CreateResourceDTO("ML Tutoring (VGG16 + Grad-CAM)", 1L, 1L, "https://famu.edu/cs/tutoring/ml", List.of("ml","explainability","grad-cam","study-support")));
+        create(new CreateResourceDTO("Writing Center — Tech Reports", 2L, 1L, "https://famu.edu/writing", List.of("resume","reports","presentations")));
+        create(new CreateResourceDTO("Linux & Git Workshop", 3L, 2L, "https://famu.edu/makerspace", List.of("git","github","cli")));
+        create(new CreateResourceDTO("Financial Aid Q&A", null, 3L, "https://famu.edu/financialaid", List.of("scholarship","aid")));
+        create(new CreateResourceDTO("Web Dev Peer Help", 2L, 2L, "https://famu.edu/cs/tutoring/web", List.of("html","css","js")));
+        create(new CreateResourceDTO("Entrepreneurship @ Crowned Coils", null, 4L, "https://crownedcoils.com", List.of("ecommerce","seo","marketing")));
+    }
 
-    seed(new ResourceDTO("r5","Writing Center — Tech Reports","Tutoring","Williams 104",
-            "https://famu.edu/writing",
-            List.of("resume","reports","presentations")));
+    // ---------- CRUD ----------
 
-    seed(new ResourceDTO("r6","Linux & Git Workshop","Lab","CS Makerspace",
-            "https://famu.edu/cs/workshops/git",
-            List.of("git","github","cli")));
+    public List<ResourceDTO> findAll() {
+        return byId.values().stream()
+                .sorted(Comparator.comparing(r -> r.name.toLowerCase()))
+                .map(Resource::toDTO)
+                .collect(Collectors.toUnmodifiableList());
+    }
 
-    seed(new ResourceDTO("r7","Financial Aid Q&A","Advising","CASS 1st Floor",
-            "https://famu.edu/financialaid",
-            List.of("scholarship","aid")));
+    public Optional<ResourceDTO> findById(long id) {
+        var r = byId.get(id);
+        return Optional.ofNullable(r).map(Resource::toDTO);
+    }
 
-    seed(new ResourceDTO("r8","Entrepreneurship @ Crowned Coils","Advising","Virtual",
-            "https://crownedcoils.com",
-            List.of("ecommerce","seo","marketing")));
-  }
+    public ResourceDTO create(CreateResourceDTO dto) {
+        long id = seq.getAndIncrement();
+        var r = new Resource(
+                id,
+                dto.name(),
+                dto.locationId(),
+                dto.categoryId(),
+                dto.url(),
+                dto.tags()
+        );
+        byId.put(id, r);
+        return r.toDTO();
+    }
 
-  private void seed(ResourceDTO r) {
-    byId.put(r.id(), r);
-    all.add(r);
-  }
+    public Optional<ResourceDTO> update(long id, UpdateResourceDTO dto) {
+        var r = byId.get(id);
+        if (r == null) return Optional.empty();
+        r.name = dto.name();
+        r.locationId = dto.locationId();
+        r.categoryId = dto.categoryId();
+        r.url = dto.url();
+        r.tags = (dto.tags() == null) ? new ArrayList<>() : new ArrayList<>(dto.tags());
+        return Optional.of(r.toDTO());
+    }
 
-  public List<ResourceDTO> findAll() {
-    return List.copyOf(all);
-  }
+    public boolean delete(long id) {
+        return byId.remove(id) != null;
+    }
 
-  public Optional<ResourceDTO> findById(String id) {
-    return Optional.ofNullable(byId.get(id));
-  }
+    // ---------- Filtering + Paging helpers ----------
 
-  public List<ResourceDTO> findByFilters(Optional<String> category, Optional<String> q) {
-    return all.stream()
-        .filter(r -> category.map(c -> r.category().equalsIgnoreCase(c)).orElse(true))
-        .filter(r -> q.map(s -> {
-          var needle = s.toLowerCase();
-          if (r.name() != null && r.name().toLowerCase().contains(needle)) return true;
-          return r.tags() != null && r.tags().stream()
-              .filter(Objects::nonNull)
-              .anyMatch(t -> t.toLowerCase().contains(needle));
-        }).orElse(true))
-        .toList();
-  }
+    public List<ResourceDTO> findByFilters(Optional<String> qOpt, Optional<Long> categoryIdOpt, Optional<Long> locationIdOpt) {
+        var stream = byId.values().stream();
+
+        if (qOpt.isPresent()) {
+            String q = qOpt.get().toLowerCase();
+            stream = stream.filter(r ->
+                    r.name.toLowerCase().contains(q) ||
+                    r.tags.stream().anyMatch(t -> t.toLowerCase().contains(q))
+            );
+        }
+        if (categoryIdOpt.isPresent()) {
+            long cid = categoryIdOpt.get();
+            stream = stream.filter(r -> Objects.equals(r.categoryId, cid));
+        }
+        if (locationIdOpt.isPresent()) {
+            long lid = locationIdOpt.get();
+            stream = stream.filter(r -> Objects.equals(r.locationId, lid));
+        }
+
+        return stream.map(Resource::toDTO)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    // ---------- Referential counts (used by delete guards) ----------
+
+    public long countByLocationId(long locationId) {
+        return byId.values().stream().filter(r -> Objects.equals(r.locationId, locationId)).count();
+    }
+
+    public long countByCategoryId(long categoryId) {
+        return byId.values().stream().filter(r -> Objects.equals(r.categoryId, categoryId)).count();
+    }
 }
