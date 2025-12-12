@@ -3,13 +3,20 @@ package edu.famu.cop3060.resources.controller;
 import edu.famu.cop3060.resources.dto.LocationDTO;
 import edu.famu.cop3060.resources.dto.PageResponse;
 import edu.famu.cop3060.resources.service.LocationsService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/locations")
 public class LocationsController {
+    // keep your existing fields / constructor / methods below
+
   private final LocationsService svc;
   public LocationsController(LocationsService svc) { this.svc = svc; }
 
