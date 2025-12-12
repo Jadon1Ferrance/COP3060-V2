@@ -1,17 +1,24 @@
 package edu.famu.cop3060.resources.controller;
 
-import edu.famu.cop3060.resources.dto.*;
-import edu.famu.cop3060.resources.exception.NotFoundException;
+import edu.famu.cop3060.resources.dto.CreateResourceDTO;
+import edu.famu.cop3060.resources.dto.UpdateResourceDTO;
+import edu.famu.cop3060.resources.dto.ResourceDTO;
+import edu.famu.cop3060.resources.dto.PageResponse;
 import edu.famu.cop3060.resources.service.ResourcesService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/resources")
 public class ResourcesController {
+    // keep your existing fields / constructor / methods below
+
 
   private final ResourcesService svc;
   public ResourcesController(ResourcesService svc) { this.svc = svc; }
