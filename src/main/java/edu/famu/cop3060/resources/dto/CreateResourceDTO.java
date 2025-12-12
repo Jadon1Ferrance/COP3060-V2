@@ -1,15 +1,17 @@
 package edu.famu.cop3060.resources.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
+/**
+ * Payload for creating a Resource.
+ * Keep fields as Strings to match our in-memory store (category/location are names, not IDs).
+ */
 public record CreateResourceDTO(
-    @NotBlank String name,
-    @NotBlank String category,          // friendly label (legacy)
-    @NotNull Long locationId,           // relation
-    @NotNull Long categoryId,           // relation
-    @NotBlank String url,
-    @Size(min = 0) List<String> tags
+        @NotBlank String name,
+        @NotBlank String category,
+        @NotBlank String location,
+        @NotBlank String url,
+        @Size(min = 1) List<@NotBlank String> tags
 ) {}
