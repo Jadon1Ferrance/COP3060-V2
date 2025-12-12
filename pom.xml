@@ -8,13 +8,13 @@
   <artifactId>cop3060-resources</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>cop3060-resources</name>
-  <description>Campus Resources API (PA03 Part 1)</description>
+  <description>Campus Resources API (PA03 Part 1/2)</description>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.3.4</version>
-    <relativePath/> <!-- lookup parent from repository -->
+    <relativePath/>
   </parent>
 
   <properties>
@@ -24,11 +24,19 @@
   </properties>
 
   <dependencies>
+    <!-- Web (Spring MVC + Jackson) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <!-- Bean Validation (Jakarta) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- Testing (JUnit + MockMvc) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -49,4 +57,3 @@
     </plugins>
   </build>
 </project>
-
