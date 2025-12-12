@@ -2,42 +2,80 @@ package edu.famu.cop3060.resources.service;
 
 import edu.famu.cop3060.resources.dto.LocationDTO;
 import edu.famu.cop3060.resources.dto.PageResponse;
-import edu.famu.cop3060.resources.exception.NotFoundException;
 import edu.famu.cop3060.resources.store.InMemoryLocationStore;
+import edu.famu.cop3060.resources.store.InMemoryResourceStore;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Location service with simple referential delete guard:
+ * we refuse to delete if any Resource uses this locationId.
+ */
 @Service
 public class LocationsService {
-  private final InMemoryLocationStore store;
-  public LocationsService(InMemoryLocationStore store) { this.store = store; }
 
-  public PageResponse<LocationDTO> list(int page, int size, String sort) {
-    List<LocationDTO> all = store.findAll();
-    Comparator<LocationDTO> cmp = switch (sort) {
-      case "-name" -> Comparator.comparing(LocationDTO::name, String.CASE_INSENSITIVE_ORDER).reversed();
-      case "name" -> Comparator.comparing(LocationDTO::name, String.CASE_INSENSITIVE_ORDER);
-      case "-building" -> Comparator.comparing(LocationDTO::building, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)).reversed();
-      case "building" -> Comparator.comparing(LocationDTO::building, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-      default -> Comparator.comparing(LocationDTO::id);
-    };
-    all = all.stream().sorted(cmp).toList();
+    private final InMemoryLocationStore locations;
+    private final InMemoryResourceStore resources;
 
-    int from = Math.max(0, page * size);
-    int to = Math.min(all.size(), from + size);
-    List<LocationDTO> slice = from >= all.size() ? List.of() : all.subList(from, to);
+    public LocationsService(InMemoryLocationStore locations, InMemoryResourceStore resources) {
+        this.locations = locations;
+        this.resources = resources;
+    }
 
-    int totalPages = (int)Math.ceil(all.size() / (double)size);
-    return new PageResponse<>(slice, page, size, all.size(), totalPages);
-  }
+    public LocationDTO create(LocationDTO dto) {
+        return locations.create(dto);
+    }
 
-  public LocationDTO get(Long id) {
-    return store.findById(id).orElseThrow(() -> new NotFoundException("location "+id+" not found"));
-  }
+    public Optional<LocationDTO> findById(long id) {
+        return locations.findById(id);
+    }
 
-  public LocationDTO create(LocationDTO draft) { return store.create(draft); }
-  public LocationDTO update(Long id, LocationDTO draft) { return store.update(id, draft).orElseThrow(() -> new NotFoundException("location "+id+" not found")); }
-  public boolean delete(Long id) { return store.delete(id); }
+    public PageResponse<LocationDTO> findPaged(int page, int size, Optional<String> sortOpt) {
+        List<LocationDTO> all = locations.findAll();
+
+        Comparator<LocationDTO> cmp = Comparator.comparing(l -> l.name().toLowerCase());
+        if (sortOpt.isPresent()) {
+            String s = sortOpt.get();
+            boolean desc = s.startsWith("-");
+            String field = desc ? s.substring(1) : s;
+            if ("name".equalsIgnoreCase(field)) {
+                cmp = Comparator.comparing(l -> l.name().toLowerCase());
+            } else if ("building".equalsIgnoreCase(field)) {
+                cmp = Comparator.comparing(l -> l.building() == null ? "" : l.building().toLowerCase());
+            }
+            if (desc) cmp = cmp.reversed();
+        }
+
+        all = all.stream().sorted(cmp).toList();
+        int total = all.size();
+        int from = Math.max(0, Math.min(page * size, total));
+        int to = Math.max(from, Math.min(from + size, total));
+        List<LocationDTO> content = all.subList(from, to);
+
+        int totalPages = (size <= 0) ? 1 : (int) Math.ceil((double) total / size);
+        return new PageResponse<>(content, page, size, total, totalPages);
+    }
+
+    public Optional<LocationDTO> update(long id, LocationDTO dto) {
+        return locations.update(id, dto);
+    }
+
+    public void delete(long id) {
+        long inUse = resources.countByLocationId(id);
+        if (inUse > 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "location " + id + " is in use by " + inUse + " resources"
+            );
+        }
+        boolean removed = locations.delete(id);
+        if (!removed) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "location " + id + " not found");
+        }
+    }
 }
